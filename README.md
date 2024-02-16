@@ -1,5 +1,5 @@
 ## Bravo Test Interface
-### How to run?
+### 🚀 Running
 ```sh
 # Install dependencies
 yarn
