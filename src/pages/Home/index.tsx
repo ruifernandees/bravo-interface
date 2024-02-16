@@ -11,6 +11,7 @@ import { compareTwoShifts } from '../../infra/services/compareTwoShifts';
 import { findRemainingJobs } from '../../infra/services/findRemainingJobs';
 import { findPossibleJobsForNurses } from '../../infra/services/findPossibleJobsForNurses';
 import { findBestFitForJobs } from '../../infra/services/findBestFitForJobs';
+import { convertHourTo12HourFormat } from '../../helpers/convertHourTo12HourFormat';
 
 const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -111,7 +112,7 @@ const Home: React.FC = () => {
             <p>Exceeds Overlap Threshold: {comparison?.exceedsOverlapThreshold !== undefined ? String(comparison.exceedsOverlapThreshold) : '-'}</p>
           </div>
           <button 
-            className="h-10 px-6  mb-3 flex justify-center items-center font-semibold rounded-md bg-orange-500 hover:bg-orange-600 transition-all ease-in text-white"
+            className="h-10 px-6  mb-3 flex justify-center items-center font-semibold rounded-md bg-blue-500 hover:bg-blue-600 transition-all ease-in text-white"
             onClick={handleCompare}
           >
             <p>Submit</p>
@@ -123,14 +124,14 @@ const Home: React.FC = () => {
         {shifts.map(_shift => {
           return <button
             key={_shift.shiftId}
-            className={`p-4 rounded-md flex flex-col ease-in transition-all focus:outline-none ${
-              selectedButtons.includes(_shift.shiftId) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+            className={`p-4 rounded-md flex flex-col items-center ease-in transition-all focus:outline-none ${
+              selectedButtons.includes(_shift.shiftId) ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
             }`}
             onClick={() => handleButtonClick(_shift.shiftId)}
           >
             <p className="font-bold">{_shift.facilityName}{'\n'}</p>
             <p>{format(new Date(_shift.shiftDate), 'yyyy-MM-dd')}{'\n'}</p>
-            <p>{`${_shift.startTime} - ${_shift.endTime}`}</p>
+            <p>{`${convertHourTo12HourFormat(_shift.startTime)} - ${convertHourTo12HourFormat(_shift.endTime)}`}</p>
           </button>
         })}
       </div>
@@ -141,19 +142,19 @@ const Home: React.FC = () => {
         <hr className="border-gray-300 my-4 w-64" />
       </section>
       <button 
-        className="h-10 px-8 mb-3 py-6 flex justify-center items-center font-semibold rounded-md bg-orange-500 hover:bg-orange-600 transition-all ease-in text-white"
+        className="h-10 px-8 mb-3 py-6 flex justify-center items-center font-semibold rounded-md bg-blue-500 hover:bg-blue-600 transition-all ease-in text-white"
         onClick={() => handleRunQuery(findRemainingJobs, 4)}
       >
         <p>Query 4</p>
       </button>
       <button 
-        className="h-10 px-8  mb-3 py-6 flex justify-center items-center font-semibold rounded-md bg-orange-500 hover:bg-orange-600 transition-all ease-in text-white"
+        className="h-10 px-8  mb-3 py-6 flex justify-center items-center font-semibold rounded-md bg-blue-500 hover:bg-blue-600 transition-all ease-in text-white"
         onClick={() => handleRunQuery(findPossibleJobsForNurses, 5)}
       >
         <p>Query 5</p>
       </button>
       <button 
-        className="h-10 px-8  mb-3 py-6 flex justify-center items-center font-semibold rounded-md bg-orange-500 hover:bg-orange-600 transition-all ease-in text-white"
+        className="h-10 px-8  mb-3 py-6 flex justify-center items-center font-semibold rounded-md bg-blue-500 hover:bg-blue-600 transition-all ease-in text-white"
         onClick={() => handleRunQuery(findBestFitForJobs, 6)}
       >
         <p>Query 6</p>
