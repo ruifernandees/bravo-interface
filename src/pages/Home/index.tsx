@@ -4,17 +4,17 @@ import { toast } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.css';
 import { Link, useNavigate } from 'react-router-dom';
-import { findAllShiftsService } from '../../infra/services/FindAllShiftsService';
+import { findAllShiftsService } from '../../infra/services/findAllShiftsService';
 import { IQuestionOneShift } from '../../domain/entities/IQuestionOneShift';
 import { format } from 'date-fns';
+import { ICompareTwoShiftsDTOOutput } from '../../domain/dtos/ICompareTwoShiftsDTOOutput';
+import { compareTwoShifts } from '../../infra/services/compareTwoShifts';
 
 const Home: React.FC = () => {
-  const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [shifts, setShifts] = useState<IQuestionOneShift[]>([])
-  const [selectedButtons, setSelectedButtons] = useState<IQuestionOneShift['shiftId'][]>([])
-
-  const navigate = useNavigate();
+  const [shifts, setShifts] = useState<IQuestionOneShift[]>([]);
+  const [selectedButtons, setSelectedButtons] = useState<IQuestionOneShift['shiftId'][]>([]);
+  const [comparison, setComparison] = useState<ICompareTwoShiftsDTOOutput>();
 
   function handleError(errorMessage: string) {
     toast.error(errorMessage, {
@@ -22,14 +22,46 @@ const Home: React.FC = () => {
     });
   }
 
-  function handleSuccess(name: string) {
-    toast.success(`Hi, ${name}!`, {
+  function handleSuccess(message: string) {
+    toast.success(message, {
       theme: 'colored'
     });
   }
  
-  async function handleGetRepositories() {
-    
+  async function handleCompare() {
+    console.log('🖼️ COMPARE')
+    setIsLoading(true);
+    try {
+      if (selectedButtons.length < 2) return handleError('You need to select two shifts.')
+
+      const [firstShift, secondShift] = selectedButtons;
+      console.log('🖼️ COMPARE',[firstShift, secondShift])
+      const result = await compareTwoShifts({
+        firstShift, secondShift
+      });
+      console.log('🖼️ COMPARE', {result})
+
+      setComparison(result)
+      handleSuccess('Comparison succeeded!')
+    } catch (error) {
+      console.error('🖼️', error)
+      handleError('Unexpected error.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleButtonClick(buttonId: IQuestionOneShift['shiftId']) {
+    console.log('⚠️🖼️', {buttonId, selectedButtons})
+    if (selectedButtons.includes(buttonId)) {
+      setSelectedButtons(selectedButtons.filter(id => id !== buttonId));
+    } else {
+      if (selectedButtons.length < 2) {
+        setSelectedButtons([...selectedButtons, buttonId]);
+      } else {
+        setSelectedButtons([selectedButtons[0], buttonId]);
+      }
+    }
   }
 
   useEffect(() => {
@@ -46,27 +78,33 @@ const Home: React.FC = () => {
     })()
   }, [])
 
-  function handleButtonClick(buttonId: IQuestionOneShift['shiftId']) {
-    console.log('⚠️🖼️', {buttonId, selectedButtons})
-    if (selectedButtons.includes(buttonId)) {
-      setSelectedButtons(selectedButtons.filter(id => id !== buttonId));
-    } else {
-      if (selectedButtons.length < 2) {
-        setSelectedButtons([...selectedButtons, buttonId]);
-      } else {
-        toast.warning('You can only select two at a time.', {
-          theme: 'colored'
-        });
-      }
-    }
-  }
-
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen">
-      <h1 className="text-center text-blue text-2xl font-black">
-        Bravo Test
-      </h1>
-      <div className="grid grid-cols-3 gap-4 mt-16 pl-8 pr-8">
+      {isLoading ?
+        <div className="absolute w-screen h-screen bg-opacity-80 bg-black flex items-center justify-center">
+          <ReactLoading type="spin" color="white" height={100} width={100} />
+        </div>
+      : null}
+      <header>
+        <h1 className="text-center text-blue text-2xl font-black">
+          Bravo Test
+        </h1>
+        <div className="flex flex-row w-screen items-center justify-around mt-8">
+          <div className="flex flex-col">
+            <p>Overlap Minutes: {comparison?.overlapMinutes !== undefined ? comparison.overlapMinutes : '-'}</p>
+            <p>Max Overlap Threshold: {comparison?.maximumOverlapThreshold !== undefined ? comparison.maximumOverlapThreshold : '-'}</p>
+            <p>Exceeds Overlap Threshold: {comparison?.exceedsOverlapThreshold !== undefined ? String(comparison.exceedsOverlapThreshold) : '-'}</p>
+          </div>
+          <button 
+            className="h-10 px-6  mb-3 flex justify-center items-center font-semibold rounded-md bg-orange-500 hover:bg-orange-600 transition-all ease-in text-white"
+            onClick={handleCompare}
+          >
+            <p>Submit</p>
+          </button> 
+        </div>
+      </header>
+      <div className="grid grid-cols-3 gap-4 mt-8 pl-8 pr-8">
+
         {shifts.map(_shift => {
           return <button
             key={_shift.shiftId}
@@ -76,7 +114,7 @@ const Home: React.FC = () => {
             onClick={() => handleButtonClick(_shift.shiftId)}
           >
             <p className="font-bold">{_shift.facilityName}{'\n'}</p>
-            <p>{format(new Date(_shift.shiftDate), 'yyyy-mm-dd')}{'\n'}</p>
+            <p>{format(new Date(_shift.shiftDate), 'yyyy-MM-dd')}{'\n'}</p>
             <p>{`${_shift.startTime} - ${_shift.endTime}`}</p>
           </button>
         })}

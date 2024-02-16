@@ -1,6 +1,6 @@
 import { IQuestionOneShift } from '../entities/IQuestionOneShift';
 
 export interface ICompareTwoShiftsDTOInput {
-  firstShift: IQuestionOneShift;
-  secondShift: IQuestionOneShift;
+  firstShift: IQuestionOneShift['shiftId'];
+  secondShift: IQuestionOneShift['shiftId'];
 }
