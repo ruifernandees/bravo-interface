@@ -46,6 +46,20 @@ const Home: React.FC = () => {
     })()
   }, [])
 
+  function handleButtonClick(buttonId: IQuestionOneShift['shiftId']) {
+    console.log('⚠️🖼️', {buttonId, selectedButtons})
+    if (selectedButtons.includes(buttonId)) {
+      setSelectedButtons(selectedButtons.filter(id => id !== buttonId));
+    } else {
+      if (selectedButtons.length < 2) {
+        setSelectedButtons([...selectedButtons, buttonId]);
+      } else {
+        toast.warning('You can only select two at a time.', {
+          theme: 'colored'
+        });
+      }
+    }
+  }
 
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen">
@@ -53,32 +67,20 @@ const Home: React.FC = () => {
         Bravo Test
       </h1>
       <div className="grid grid-cols-3 gap-4 mt-16 pl-8 pr-8">
-    {shifts.map(_shift => {
-      return         <button
-      key={_shift.shiftId}
-      className={`p-4 rounded-md flex flex-col focus:outline-none ${
-        selectedButtons.includes(_shift.shiftId) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
-      }`}
-      // onClick={() => handleButtonClick(buttonId)}
-    >
-      <p className="font-bold">{_shift.facilityName}{'\n'}</p>
-      <p>{format(new Date(_shift.shiftDate), 'yyyy-mm-dd')}{'\n'}</p>
-      <p>{`${_shift.startTime} - ${_shift.endTime}`}</p>
-    </button>
-    })}
-
+        {shifts.map(_shift => {
+          return <button
+            key={_shift.shiftId}
+            className={`p-4 rounded-md flex flex-col ease-in transition-all focus:outline-none ${
+              selectedButtons.includes(_shift.shiftId) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+            onClick={() => handleButtonClick(_shift.shiftId)}
+          >
+            <p className="font-bold">{_shift.facilityName}{'\n'}</p>
+            <p>{format(new Date(_shift.shiftDate), 'yyyy-mm-dd')}{'\n'}</p>
+            <p>{`${_shift.startTime} - ${_shift.endTime}`}</p>
+          </button>
+        })}
       </div>
-      {/* <button 
-        className="h-10 px-6 w-300 mb-3 flex justify-center items-center font-semibold rounded-md bg-orange-500 hover:bg-orange-600 transition-all ease-in text-white"
-      >
-        <p>Generate Timeline</p>
-      </button>
-      <button 
-        className="h-10 px-6 w-300 font-semibold rounded-md bg-blue-500 hover:bg-blue-600 transition-all ease-in text-white"
-        onClick={() => navigate('/about')}
-      >
-        About
-      </button> */}
     </div>
   )
 }
